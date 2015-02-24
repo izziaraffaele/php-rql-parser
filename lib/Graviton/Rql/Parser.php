@@ -37,10 +37,14 @@ class Parser
         '>=' => 'ge',
         '<' => 'lt',
         '<=' => 'le',
+        'in' => 'in',
+        'out' => 'out',
         'and' => 'and',
         'or' => 'or',
         'sort' => 'sort',
         'limit' => 'limit',
+        'offset' => 'offset',
+        'aggregate' => 'aggregate',
         'select' => 'select'
     );
 

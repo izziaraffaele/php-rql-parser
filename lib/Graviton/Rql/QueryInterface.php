@@ -17,6 +17,12 @@ namespace Graviton\Rql;
  */
 interface QueryInterface
 {
+    /**
+     * Executes the query
+     *
+     * @return mixed
+     */
+    public function execute();
 
     /**
      * Apply "equal" condition; AND
@@ -57,6 +63,34 @@ interface QueryInterface
      * @return void
      */
     public function orNe($field, $value);
+
+    /**
+     * Apply "in" condition; AND
+     *
+     * @return void
+     */
+    public function andIn();
+
+    /**
+     * Apply "or in" condition; OR
+     *
+     * @return void
+     */
+    public function orIn();
+
+    /**
+     * Apply "not in" condition; AND
+     *
+     * @return void
+     */
+    public function andOut();
+
+    /**
+     * Apply "or not in" condition; OR
+     *
+     * @return void
+     */
+    public function orOut();
 
     /**
      * Apply "greater then" condition; AND
@@ -138,11 +172,4 @@ interface QueryInterface
      */
     public function orLe($field, $value);
 
-    /**
-     * @param string      $fieldName Field name
-     * @param string|null $direction Sort direction (asc/desc)
-     *
-     * @return mixed
-     */
-    public function sort($fieldName, $direction = null);
 }

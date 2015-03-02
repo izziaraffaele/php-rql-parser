@@ -25,6 +25,7 @@ class Orchestrate implements QueryInterface
     private $limit;
     private $offset;
     private $sort;
+    private $characters_limit = 64;
 
     /**
      * Constructor; instanciate with a valid DocumentRepository instance
@@ -375,6 +376,10 @@ class Orchestrate implements QueryInterface
             return array_map([$this,'escapeValues'],$values);
         }
 
+        if( strlen( $values ) > $this->characters_limit )
+        {
+            $values = substr($values, 0, $this->characters_limit).'*';
+        }
 
         $template = ( in_array($values, ['false','true','null'] ) || strstr($values,'*') ) ? '%s' : '`%s`';
 

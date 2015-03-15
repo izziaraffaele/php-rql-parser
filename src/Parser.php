@@ -4,18 +4,14 @@ namespace Graviton\Rql;
 
 use Graviton\Rql\Parser\Strategy;
 use Graviton\Rql\Parser\Strategy\ParsingStrategyInterface;
+use Graviton\Rql\AST\OperationInterface;
 
 /**
  * RQL Parser
- * This class tries to form array structures form RQL queries.
- * It aims to be a reference implementation port to PHP of the js version located at
- * https://github.com/persvr/rql/blob/master/parser.js
  *
- * @category Graviton
- * @package  Rql
- * @author   Dario Nuevo <dario.nuevo@swisscom.com>
- * @license  http://opensource.org/licenses/gpl-license.php GNU Public License
- * @link     http://swisscom.com
+ * @author  List of contributors <https://github.com/libgraviton/php-rql-parser/graphs/contributors>
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @link    http://swisscom.ch
  */
 class Parser
 {
@@ -28,14 +24,6 @@ class Parser
      * @var ParsingStrategyInterface[]
      */
     private $strategies = array();
-
-    /**
-     * @var string<int>
-     */
-    private $internalOperations = array(
-        Lexer::T_SORT => 'sortOperation',
-        Lexer::T_LIMIT => 'limitOperation',
-    );
 
     public static function createParser($rql)
     {
@@ -71,7 +59,7 @@ class Parser
     /**
      * return abstract syntax tree
      *
-     * @return AST\OperationInterface|null
+     * @return AST\OperationInterface
      */
     public function getAST()
     {
@@ -79,33 +67,40 @@ class Parser
     }
 
     /**
-     * @return null|AST\OperationInterface
+     * @return AST\OperationInterface
      */
     public function resourceQuery($first = false)
     {
+        $operation = false;
         $this->lexer->moveNext();
         $type = $this->lexer->lookahead['type'];
 
-        if (is_null($type)) {
-            return;
-        }
         foreach ($this->strategies as $strategy) {
             if ($strategy->accepts($type)) {
                 $operation = $strategy->parse();
                 $glimpse = $this->lexer->glimpse();
                 if ($first && $glimpse['type'] == Lexer::T_COMMA) {
                     $this->lexer->moveNext();
-                    $wrapper = new AST\QueryOperation();
-                    $wrapper->addQuery($operation);
-                    $query = $this->resourceQuery();
-                    if ($query instanceof AST\OperationInterface) {
-                        $wrapper->addQuery($query);
-                    }
-                    return $wrapper;
+                    $operation = $this->wrapperOperation($operation);
                 }
-                return $operation;
             }
         }
-        throw new \RuntimeException(sprintf("No strategies matched the type %s. Did you load all strategies?", $type));
+        if (!$operation) {
+            throw new \RuntimeException(
+                sprintf("No strategies matched the type %s. Did you load all strategies?", $type)
+            );
+        }
+        return $operation;
+    }
+
+    /**
+     * @return AST\OperationInterface
+     */
+    protected function wrapperOperation(OperationInterface $operation)
+    {
+        $wrapper = new AST\QueryOperation();
+        $wrapper->addQuery($operation);
+        $wrapper->addQuery($this->resourceQuery());
+        return $wrapper;
     }
 }

@@ -7,6 +7,11 @@ use Graviton\Rql\AST\OperationFactory;
 use Graviton\Rql\AST\QueryOperationInterface;
 use Graviton\Rql\Lexer;
 
+/**
+ * @author  List of contributors <https://github.com/libgraviton/php-rql-parser/graphs/contributors>
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @link    http://swisscom.ch
+ */
 class QueryOperationStrategy extends ParsingStrategy
 {
     /**
@@ -30,7 +35,11 @@ class QueryOperationStrategy extends ParsingStrategy
             if ($query) {
                 $operation->addQuery($query);
             }
-            $hasQueries = $this->lexer->lookahead['type'] == Lexer::T_CLOSE_PARENTHESIS;
+            $glimpse = $this->lexer->glimpse();
+            $hasQueries = $glimpse['type'] == Lexer::T_COMMA;
+            if (!$hasQueries) {
+                ParserUtil::parseEnd($this->lexer);
+            }
         }
 
         return $operation;

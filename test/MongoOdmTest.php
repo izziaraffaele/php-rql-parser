@@ -20,11 +20,9 @@ use Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver;
 /**
  * run tests against local mongodb with loaded fixtures
  *
- * @category MongoODM
- * @package  RqlParser
- * @author   Lucas Bickel <lucas.bickel@swisscom.com>
- * @license  http://opensource.org/licenses/MIT MIT License (c) 2015 Swisscom
- * @link     http://swisscom.ch
+ * @author  List of contributors <https://github.com/libgraviton/php-rql-parser/graphs/contributors>
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @link    http://swisscom.ch
  */
 class MongoOdmTest extends \PHPUnit_Framework_TestCase
 {
@@ -226,6 +224,12 @@ class MongoOdmTest extends \PHPUnit_Framework_TestCase
             'like and limit search' => array(
                 'like(name,*et),limit(1)', array(
                     array('name' => 'My First Sprocket')
+                )
+            ),
+            'complex example from #6 without sugar' => array(
+                'or(and(eq(name,The Third Wheel),lt(count,10)),eq(count,100))', array(
+                    array('name' => 'The Third Wheel', 'count' => 3),
+                    array('name' => 'A Simple Widget', 'count' => 100),
                 )
             ),
         );

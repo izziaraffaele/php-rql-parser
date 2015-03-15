@@ -7,6 +7,11 @@ use Graviton\Rql\AST\OperationFactory;
 use Graviton\Rql\AST\SortOperationInterface;
 use Graviton\Rql\Lexer;
 
+/**
+ * @author  List of contributors <https://github.com/libgraviton/php-rql-parser/graphs/contributors>
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @link    http://swisscom.ch
+ */
 class SortOperationStrategy extends ParsingStrategy
 {
     /**
@@ -30,8 +35,7 @@ class SortOperationStrategy extends ParsingStrategy
             if ($this->lexer->lookahead == null || $this->lexer->lookahead['type'] == Lexer::T_CLOSE_PARENTHESIS) {
                 $sortDone = true;
             } elseif ($this->lexer->lookahead['type'] == Lexer::T_STRING) {
-                $property = ParserUtil::getString($this->lexer, false);
-                $operation->addField(array($property, $type));
+                $operation->addField($this->getField($type));
             }
             ParserUtil::parseComma($this->lexer, true);
         }
@@ -55,11 +59,23 @@ class SortOperationStrategy extends ParsingStrategy
                 break;
             case Lexer::T_PLUS:
                 $this->lexer->moveNext();
-                // + is same as default
-            default:
                 $type = 'asc';
                 break;
+            default:
+                // don't touch type in default case and leave it up to the visitor to set defaults
+                $type = null;
         }
         return $type;
+    }
+
+    private function getField($type)
+    {
+        $property = ParserUtil::getString($this->lexer, false);
+
+        $field = array($property);
+        if (!empty($type)) {
+            $field[] = $type;
+        }
+        return $field;
     }
 }

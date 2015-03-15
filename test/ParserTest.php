@@ -4,6 +4,11 @@ namespace Graviton\Rql;
 
 use Graviton\Rql\AST;
 
+/**
+ * @author  List of contributors <https://github.com/libgraviton/php-rql-parser/graphs/contributors>
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @link    http://swisscom.ch
+ */
 class ParserTest extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -46,6 +51,12 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $andAST->addQuery($neAST);
         $tests['simple and'] = array('and(eq(name,foo),ne(name,bar))', $andAST);
 
+        $tripleAndAST = new AST\AndOperation;
+        $tripleAndAST->addQuery($eqAST);
+        $tripleAndAST->addQuery($eqAST);
+        $tripleAndAST->addQuery($eqAST);
+        $tests['triple and'] = array('and(eq(name,foo),eq(name,foo),eq(name,foo))', $tripleAndAST);
+
         $eqASTint = new AST\EqOperation;
         $eqASTint->setProperty('count');
         $eqASTint->setValue(1);
@@ -81,6 +92,11 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $sortAST->addField(array('name', 'desc'));
         $tests['sort'] = array('sort(+count,-name)', $sortAST);
 
+        $sortAST2 = new AST\SortOperation;
+        $sortAST2->addField(array('count'));
+        $sortAST2->addField(array('asc'));
+        $tests['sort with asc as param'] = array('sort(count,asc)', $sortAST2);
+
         $likeAST = new AST\LikeOperation;
         $likeAST->setProperty('name');
         $likeAST->setValue('fo*');
@@ -107,6 +123,11 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $gtLimitAST->addQuery($gtAST);
         $gtLimitAST->addQuery($limitAST);
         $tests['gt and limit'] = array('gt(count,1),limit(10)', $gtLimitAST);
+
+        $complexAST = new AST\OrOperation;
+        $complexAST->addQuery($andAST);
+        $complexAST->addQuery($gtAST);
+        $tests['complex nested query'] = array('or(and(eq(name,foo),ne(name,bar)),gt(count,1))', $complexAST);
 
         return $tests;
     }
